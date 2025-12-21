@@ -110,7 +110,7 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["file.iask.in"];
+pub const RENDEZVOUS_SERVERS: &[&str] = &["file.iask.cn"];
 pub const RS_PUB_KEY: &str = "94F6LKzlC9dM2v8dU0AjynHe4BY8q1ykIvROQSbkIzw=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
