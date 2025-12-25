@@ -1937,7 +1937,7 @@ impl LocalConfig {
             config.store();
         }
     }
-}
+
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct DiscoveryPeer {
