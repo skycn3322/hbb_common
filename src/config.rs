@@ -110,7 +110,7 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["file.iask.cn"];
+pub const RENDEZVOUS_SERVERS: &[&str] = &["file.iask.in"];
 pub const RS_PUB_KEY: &str = "94F6LKzlC9dM2v8dU0AjynHe4BY8q1ykIvROQSbkIzw=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
@@ -463,6 +463,19 @@ impl Config2 {
     fn load() -> Config2 {
         let mut config = Config::load_::<Config2>("2");
         let mut store = false;
+        // 安全-拒绝局域网发现：默认打勾 (N -> 表示禁用发现，拒绝)
+
+        if !config.options.contains_key(keys::OPTION_ENABLE_LAN_DISCOVERY) {
+            // "N" 通常意味着“禁用”或“拒绝”
+            config.options.insert(keys::OPTION_ENABLE_LAN_DISCOVERY.to_string(), "N".to_string());
+            store = true;
+        }
+
+        // 安全-允许远程修改配置：默认打勾 (Y)
+        if !config.options.contains_key(keys::OPTION_ALLOW_REMOTE_CONFIG_MODIFICATION) {
+            config.options.insert(keys::OPTION_ALLOW_REMOTE_CONFIG_MODIFICATION.to_string(), "Y".to_string());
+            store = true;
+        }
         if let Some(mut socks) = config.socks {
             let (password, _, store2) =
                 decrypt_str_or_original(&socks.password, PASSWORD_ENC_VERSION);
@@ -1751,10 +1764,50 @@ pub struct LocalConfig {
     ui_flutter: HashMap<String, String>,
 }
 
+use crate::config::keys; // 确保 keys 模块可见
+
 impl LocalConfig {
     fn load() -> LocalConfig {
-        Config::load_::<LocalConfig>("_local")
+        let mut config = Config::load_::<LocalConfig>("_local");
+        let mut store = false;
+        
+        // --- 1. 本地 UI/主题设置迁移 ---
+
+        // 常规-主题：默认主题改为暗黑 (keys::OPTION_THEME)
+        if !config.options.contains_key(keys::OPTION_THEME) {
+            config.options.insert(keys::OPTION_THEME.to_string(), "dark".to_string());
+            store = true;
+        }
+
+        // 常规-启动时检查软件更新：默认去勾 (N) (keys::OPTION_ENABLE_CHECK_UPDATE)
+        if !config.options.contains_key(keys::OPTION_ENABLE_CHECK_UPDATE) {
+            config.options.insert(keys::OPTION_ENABLE_CHECK_UPDATE.to_string(), "N".to_string());
+            store = true;
+        }
+        
+        // --- 2. 本地网络优化设置迁移 ---
+
+        // 常规-启用 UDP 打洞：默认打勾 (Y) (keys::OPTION_ENABLE_UDP_PUNCH)
+        if !config.options.contains_key(keys::OPTION_ENABLE_UDP_PUNCH) {
+            config.options.insert(keys::OPTION_ENABLE_UDP_PUNCH.to_string(), "Y".to_string());
+            store = true;
+        }
+
+        // 常规-启用 IPv6 P2P 连接：默认打勾 (Y) (keys::OPTION_ENABLE_IPV6_PUNCH)
+        if !config.options.contains_key(keys::OPTION_ENABLE_IPV6_PUNCH) {
+            config.options.insert(keys::OPTION_ENABLE_IPV6_PUNCH.to_string(), "Y".to_string());
+            store = true;
+        }
+        
+        // --- 统一保存逻辑 ---
+        // 只有当至少一个默认值被设置时，才需要将配置写入磁盘。
+        if store {
+            config.store();
+        }
+        
+        config
     }
+}
 
     fn store(&self) {
         Config::store_(self, "_local");
