@@ -1727,6 +1727,8 @@ pub struct LocalConfig {
     ui_flutter: HashMap<String, String>,
 }
 
+use crate::config::keys; // 确保 keys 模块可见
+
 impl LocalConfig {
     fn load() -> LocalConfig {
         let mut config = Config::load_::<LocalConfig>("_local");
