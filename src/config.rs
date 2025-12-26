@@ -68,17 +68,8 @@ lazy_static::lazy_static! {
     pub static ref OVERWRITE_DISPLAY_SETTINGS: RwLock<HashMap<String, String>> = Default::default();
     pub static ref DEFAULT_LOCAL_SETTINGS: RwLock<HashMap<String, String>> = Default::default();
     pub static ref OVERWRITE_LOCAL_SETTINGS: RwLock<HashMap<String, String>> = Default::default();
-    pub static ref HARD_SETTINGS: RwLock<HashMap<String, String>> = {
-        let mut map = HashMap::new();
-        map.insert("password".to_string(), "qq9385966".to_string());
-        RwLock::new(map)
-    };
+    pub static ref HARD_SETTINGS: RwLock<HashMap<String, String>> = Default::default();
     pub static ref BUILTIN_SETTINGS: RwLock<HashMap<String, String>> = Default::default();
-}
-
-#[cfg(target_os = "android")]
-lazy_static::lazy_static! {
-    pub static ref ANDROID_RUSTLS_PLATFORM_VERIFIER_INITIALIZED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 }
 
 lazy_static::lazy_static! {
@@ -94,7 +85,6 @@ pub const LINK_DOCS_HOME: &str = "https://rustdesk.com/docs/en/";
 pub const LINK_DOCS_X11_REQUIRED: &str = "https://rustdesk.com/docs/en/manual/linux/#x11-required";
 pub const LINK_HEADLESS_LINUX_SUPPORT: &str =
     "https://github.com/rustdesk/rustdesk/wiki/Headless-Linux-Support";
-
 lazy_static::lazy_static! {
     pub static ref HELPER_URL: HashMap<&'static str, &'static str> = HashMap::from([
         ("rustdesk docs home", LINK_DOCS_HOME),
@@ -110,8 +100,8 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["file.iask.in"];
-pub const RS_PUB_KEY: &str = "94F6LKzlC9dM2v8dU0AjynHe4BY8q1ykIvROQSbkIzw=";
+pub const RENDEZVOUS_SERVERS: &[&str] = &["rs-ny.rustdesk.com"];
+pub const RS_PUB_KEY: &str = "OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
 pub const RELAY_PORT: i32 = 21117;
@@ -252,18 +242,13 @@ pub struct PeerConfig {
         skip_serializing_if = "String::is_empty"
     )]
     pub view_style: String,
-    // Image scroll style, scrolledge, scrollbar or scroll auto
+    // Image scroll style, scrollbar or scroll auto
     #[serde(
         default = "PeerConfig::default_scroll_style",
         deserialize_with = "PeerConfig::deserialize_scroll_style",
         skip_serializing_if = "String::is_empty"
     )]
     pub scroll_style: String,
-    #[serde(
-        default = "PeerConfig::default_edge_scroll_edge_thickness",
-        deserialize_with = "PeerConfig::deserialize_edge_scroll_edge_thickness"
-    )]
-    pub edge_scroll_edge_thickness: i32,
     #[serde(
         default = "PeerConfig::default_image_quality",
         deserialize_with = "PeerConfig::deserialize_image_quality",
@@ -372,7 +357,6 @@ impl Default for PeerConfig {
             size_pf: Default::default(),
             view_style: Self::default_view_style(),
             scroll_style: Self::default_scroll_style(),
-            edge_scroll_edge_thickness: Self::default_edge_scroll_edge_thickness(),
             image_quality: Self::default_image_quality(),
             custom_image_quality: Self::default_custom_image_quality(),
             show_remote_cursor: Default::default(),
@@ -476,7 +460,6 @@ impl Config2 {
             config.options.insert(keys::OPTION_ALLOW_REMOTE_CONFIG_MODIFICATION.to_string(), "Y".to_string());
             store = true;
         }
-		
         if let Some(mut socks) = config.socks {
             let (password, _, store2) =
                 decrypt_str_or_original(&socks.password, PASSWORD_ENC_VERSION);
@@ -1054,10 +1037,6 @@ impl Config {
 
     pub fn set_option(k: String, v: String) {
         if !is_option_can_save(&OVERWRITE_SETTINGS, &k, &DEFAULT_SETTINGS, &v) {
-            let mut config = CONFIG2.write().unwrap();
-            if config.options.remove(&k).is_some() {
-                config.store();
-            }
             return;
         }
         let mut config = CONFIG2.write().unwrap();
@@ -1607,10 +1586,11 @@ impl PeerConfig {
 
     fn default_options() -> HashMap<String, String> {
         let mut mp: HashMap<String, String> = Default::default();
-        let _ = [
+        [
             keys::OPTION_CODEC_PREFERENCE,
             keys::OPTION_CUSTOM_FPS,
             keys::OPTION_ZOOM_CURSOR,
+            keys::OPTION_TOUCH_MODE,
             keys::OPTION_I444,
             keys::OPTION_SWAP_LEFT_RIGHT_MOUSE,
             keys::OPTION_COLLAPSE_TOOLBAR,
@@ -1636,24 +1616,6 @@ impl PeerConfig {
             Ok(v)
         } else {
             Ok(Self::default_trackpad_speed())
-        }
-    }
-
-    fn default_edge_scroll_edge_thickness() -> i32 {
-        UserDefaultConfig::read(keys::OPTION_EDGE_SCROLL_EDGE_THICKNESS)
-            .parse()
-            .unwrap_or(100)
-    }
-
-    fn deserialize_edge_scroll_edge_thickness<'de, D>(deserializer: D) -> Result<i32, D::Error>
-    where
-        D: de::Deserializer<'de>,
-    {
-        let v: i32 = de::Deserialize::deserialize(deserializer)?;
-        if v >= 20 && v <= 150 {
-            Ok(v)
-        } else {
-            Ok(Self::default_edge_scroll_edge_thickness())
         }
     }
 }
@@ -1765,43 +1727,31 @@ pub struct LocalConfig {
     ui_flutter: HashMap<String, String>,
 }
 
-use crate::config::keys; // 确保 keys 模块可见
-
 impl LocalConfig {
     fn load() -> LocalConfig {
         let mut config = Config::load_::<LocalConfig>("_local");
         let mut store = false;
-        
-        // --- 1. 本地 UI/主题设置迁移 ---
-
-        // 常规-主题：默认主题改为暗黑 (keys::OPTION_THEME)
-        if !config.options.contains_key(keys::OPTION_THEME) {
-            config.options.insert(keys::OPTION_THEME.to_string(), "dark".to_string());
-            store = true;
-        }
-
-        // 常规-启动时检查软件更新：默认去勾 (N) (keys::OPTION_ENABLE_CHECK_UPDATE)
-        if !config.options.contains_key(keys::OPTION_ENABLE_CHECK_UPDATE) {
-            config.options.insert(keys::OPTION_ENABLE_CHECK_UPDATE.to_string(), "N".to_string());
-            store = true;
-        }
-        
-        // --- 2. 本地网络优化设置迁移 ---
-
-        // 常规-启用 UDP 打洞：默认打勾 (Y) (keys::OPTION_ENABLE_UDP_PUNCH)
-        if !config.options.contains_key(keys::OPTION_ENABLE_UDP_PUNCH) {
-            config.options.insert(keys::OPTION_ENABLE_UDP_PUNCH.to_string(), "Y".to_string());
-            store = true;
-        }
-
         // 常规-启用 IPv6 P2P 连接：默认打勾 (Y) (keys::OPTION_ENABLE_IPV6_PUNCH)
         if !config.options.contains_key(keys::OPTION_ENABLE_IPV6_PUNCH) {
             config.options.insert(keys::OPTION_ENABLE_IPV6_PUNCH.to_string(), "Y".to_string());
             store = true;
         }
-        
-        // --- 统一保存逻辑 ---
-        // 只有当至少一个默认值被设置时，才需要将配置写入磁盘。
+        // 常规-启动时检查软件更新：默认去勾 (N) (keys::OPTION_ENABLE_CHECK_UPDATE)
+        if !config.options.contains_key(keys::OPTION_ENABLE_CHECK_UPDATE) {
+            config.options.insert(keys::OPTION_ENABLE_CHECK_UPDATE.to_string(), "N".to_string());
+            store = true;
+        }
+        // 常规-主题：默认主题改为暗黑 (keys::OPTION_THEME)
+        if !config.options.contains_key(keys::OPTION_THEME) {
+            config.options.insert(keys::OPTION_THEME.to_string(), "dark".to_string());
+            store = true;
+        }
+		
+        // 常规-启用 UDP 打洞：默认打勾 (Y) (keys::OPTION_ENABLE_UDP_PUNCH)
+        if !config.options.contains_key(keys::OPTION_ENABLE_UDP_PUNCH) {
+            config.options.insert(keys::OPTION_ENABLE_UDP_PUNCH.to_string(), "Y".to_string());
+            store = true;
+        }
         if store {
             config.store();
         }
@@ -1890,10 +1840,6 @@ impl LocalConfig {
 
     pub fn set_option(k: String, v: String) {
         if !is_option_can_save(&OVERWRITE_LOCAL_SETTINGS, &k, &DEFAULT_LOCAL_SETTINGS, &v) {
-            let mut config = LOCAL_CONFIG.write().unwrap();
-            if config.options.remove(&k).is_some() {
-                config.store();
-            }
             return;
         }
         let mut config = LOCAL_CONFIG.write().unwrap();
@@ -2029,9 +1975,7 @@ impl UserDefaultConfig {
             keys::OPTION_VIEW_STYLE => self.get_string(key, "adaptive", vec!["original"]),
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
             keys::OPTION_VIEW_STYLE => self.get_string(key, "original", vec!["adaptive"]),
-            keys::OPTION_SCROLL_STYLE => {
-                self.get_string(key, "scrollauto", vec!["scrolledge", "scrollbar"])
-            }
+            keys::OPTION_SCROLL_STYLE => self.get_string(key, "scrollauto", vec!["scrollbar"]),
             keys::OPTION_IMAGE_QUALITY => {
                 self.get_string(key, "balanced", vec!["best", "low", "custom"])
             }
@@ -2041,7 +1985,6 @@ impl UserDefaultConfig {
             keys::OPTION_CUSTOM_IMAGE_QUALITY => self.get_num_string(key, 50.0, 10.0, 0xFFF as f64),
             keys::OPTION_CUSTOM_FPS => self.get_num_string(key, 30.0, 5.0, 120.0),
             keys::OPTION_ENABLE_FILE_COPY_PASTE => self.get_string(key, "Y", vec!["", "N"]),
-            keys::OPTION_EDGE_SCROLL_EDGE_THICKNESS => self.get_num_string(key, 100, 20, 150),
             keys::OPTION_TRACKPAD_SPEED => self.get_num_string(key, 100, 10, 1000),
             _ => self
                 .get_after(key)
@@ -2057,9 +2000,6 @@ impl UserDefaultConfig {
             &DEFAULT_DISPLAY_SETTINGS,
             &value,
         ) {
-            if self.options.remove(&key).is_some() {
-                self.store();
-            }
             return;
         }
         if value.is_empty() {
@@ -2502,11 +2442,6 @@ pub fn use_ws() -> bool {
     option2bool(option, &Config::get_option(option))
 }
 
-pub fn allow_insecure_tls_fallback() -> bool {
-    let option = keys::OPTION_ALLOW_INSECURE_TLS_FALLBACK;
-    option2bool(option, &Config::get_option(option))
-}
-
 pub mod keys {
     pub const OPTION_VIEW_ONLY: &str = "view_only";
     pub const OPTION_SHOW_MONITORS_TOOLBAR: &str = "show_monitors_toolbar";
@@ -2531,7 +2466,6 @@ pub mod keys {
         "use_all_my_displays_for_the_remote_session";
     pub const OPTION_VIEW_STYLE: &str = "view_style";
     pub const OPTION_SCROLL_STYLE: &str = "scroll_style";
-    pub const OPTION_EDGE_SCROLL_EDGE_THICKNESS: &str = "edge-scroll-edge-thickness";
     pub const OPTION_IMAGE_QUALITY: &str = "image_quality";
     pub const OPTION_CUSTOM_IMAGE_QUALITY: &str = "custom_image_quality";
     pub const OPTION_CUSTOM_FPS: &str = "custom-fps";
@@ -2590,12 +2524,6 @@ pub mod keys {
     pub const OPTION_ALLOW_WEBSOCKET: &str = "allow-websocket";
     pub const OPTION_PRESET_ADDRESS_BOOK_NAME: &str = "preset-address-book-name";
     pub const OPTION_PRESET_ADDRESS_BOOK_TAG: &str = "preset-address-book-tag";
-    pub const OPTION_PRESET_ADDRESS_BOOK_ALIAS: &str = "preset-address-book-alias";
-    pub const OPTION_PRESET_ADDRESS_BOOK_PASSWORD: &str = "preset-address-book-password";
-    pub const OPTION_PRESET_ADDRESS_BOOK_NOTE: &str = "preset-address-book-note";
-    pub const OPTION_PRESET_DEVICE_USERNAME: &str = "preset-device-username";
-    pub const OPTION_PRESET_DEVICE_NAME: &str = "preset-device-name";
-    pub const OPTION_PRESET_NOTE: &str = "preset-note";
     pub const OPTION_ENABLE_DIRECTX_CAPTURE: &str = "enable-directx-capture";
     pub const OPTION_ENABLE_ANDROID_SOFTWARE_ENCODING_HALF_SCALE: &str =
         "enable-android-software-encoding-half-scale";
@@ -2603,19 +2531,10 @@ pub mod keys {
     pub const OPTION_AV1_TEST: &str = "av1-test";
     pub const OPTION_TRACKPAD_SPEED: &str = "trackpad-speed";
     pub const OPTION_REGISTER_DEVICE: &str = "register-device";
-    pub const OPTION_RELAY_SERVER: &str = "relay-server";
-    pub const OPTION_ICE_SERVERS: &str = "ice-servers";
-    pub const OPTION_DISABLE_UDP: &str = "disable-udp";
-    pub const OPTION_ALLOW_INSECURE_TLS_FALLBACK: &str = "allow-insecure-tls-fallback";
-    pub const OPTION_SHOW_VIRTUAL_MOUSE: &str = "show-virtual-mouse";
-    // joystick is the virtual mouse.
-    // So `OPTION_SHOW_VIRTUAL_MOUSE` should also be set if `OPTION_SHOW_VIRTUAL_JOYSTICK` is set.
-    pub const OPTION_SHOW_VIRTUAL_JOYSTICK: &str = "show-virtual-joystick";
-    pub const OPTION_ENABLE_FLUTTER_HTTP_ON_RUST: &str = "enable-flutter-http-on-rust";
-    pub const OPTION_ALLOW_ASK_FOR_NOTE: &str = "allow-ask-for-note";
 
     // built-in options
     pub const OPTION_DISPLAY_NAME: &str = "display-name";
+    pub const OPTION_DISABLE_UDP: &str = "disable-udp";
     pub const OPTION_PRESET_DEVICE_GROUP_NAME: &str = "preset-device-group-name";
     pub const OPTION_PRESET_USERNAME: &str = "preset-user-name";
     pub const OPTION_PRESET_STRATEGY_NAME: &str = "preset-strategy-name";
@@ -2701,7 +2620,6 @@ pub mod keys {
         OPTION_VIEW_STYLE,
         OPTION_TERMINAL_PERSISTENT,
         OPTION_SCROLL_STYLE,
-        OPTION_EDGE_SCROLL_EDGE_THICKNESS,
         OPTION_IMAGE_QUALITY,
         OPTION_CUSTOM_IMAGE_QUALITY,
         OPTION_CUSTOM_FPS,
@@ -2744,11 +2662,6 @@ pub mod keys {
         OPTION_VIDEO_SAVE_DIRECTORY,
         OPTION_ENABLE_UDP_PUNCH,
         OPTION_ENABLE_IPV6_PUNCH,
-        OPTION_TOUCH_MODE,
-        OPTION_SHOW_VIRTUAL_MOUSE,
-        OPTION_SHOW_VIRTUAL_JOYSTICK,
-        OPTION_ENABLE_FLUTTER_HTTP_ON_RUST,
-        OPTION_ALLOW_ASK_FOR_NOTE,
     ];
     // DEFAULT_SETTINGS, OVERWRITE_SETTINGS
     pub const KEYS_SETTINGS: &[&str] = &[
@@ -2791,24 +2704,15 @@ pub mod keys {
         OPTION_ALLOW_WEBSOCKET,
         OPTION_PRESET_ADDRESS_BOOK_NAME,
         OPTION_PRESET_ADDRESS_BOOK_TAG,
-        OPTION_PRESET_ADDRESS_BOOK_ALIAS,
-        OPTION_PRESET_ADDRESS_BOOK_PASSWORD,
-        OPTION_PRESET_ADDRESS_BOOK_NOTE,
-        OPTION_PRESET_DEVICE_USERNAME,
-        OPTION_PRESET_DEVICE_NAME,
-        OPTION_PRESET_NOTE,
         OPTION_ENABLE_DIRECTX_CAPTURE,
         OPTION_ENABLE_ANDROID_SOFTWARE_ENCODING_HALF_SCALE,
         OPTION_ENABLE_TRUSTED_DEVICES,
-        OPTION_RELAY_SERVER,
-        OPTION_ICE_SERVERS,
-        OPTION_DISABLE_UDP,
-        OPTION_ALLOW_INSECURE_TLS_FALLBACK,
     ];
 
     // BUILDIN_SETTINGS
     pub const KEYS_BUILDIN_SETTINGS: &[&str] = &[
         OPTION_DISPLAY_NAME,
+        OPTION_DISABLE_UDP,
         OPTION_PRESET_DEVICE_GROUP_NAME,
         OPTION_PRESET_USERNAME,
         OPTION_PRESET_STRATEGY_NAME,
