@@ -476,6 +476,7 @@ impl Config2 {
             config.options.insert(keys::OPTION_ALLOW_REMOTE_CONFIG_MODIFICATION.to_string(), "Y".to_string());
             store = true;
         }
+		
         if let Some(mut socks) = config.socks {
             let (password, _, store2) =
                 decrypt_str_or_original(&socks.password, PASSWORD_ENC_VERSION);
@@ -1808,7 +1809,6 @@ impl LocalConfig {
         config
     }
 
-
     fn store(&self) {
         Config::store_(self, "_local");
     }
@@ -1937,7 +1937,7 @@ impl LocalConfig {
             config.store();
         }
     }
-
+}
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct DiscoveryPeer {
