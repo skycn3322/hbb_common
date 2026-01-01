@@ -449,15 +449,15 @@ impl Config2 {
         let mut store = false;
         // 安全-拒绝局域网发现：默认打勾 (N -> 表示禁用发现，拒绝)
 
-        if !config.options.contains_key("enable-lan-discovery") {
+        if !config.options.contains_key("enable-lan-discovery") {
             // "N" 通常意味着“禁用”或“拒绝”
-            config.options.insert("enable-lan-discovery".to_string(), "N".to_string());
-            store = true;
+            config.options.insert("enable-lan-discovery".to_string(), "N".to_string());
+            store = true;
         }
 
         // 安全-允许远程修改配置：默认打勾 (Y)
-        if !config.options.contains_key("allow-remote-config-modification") {
-            config.options.insert("allow-remote-config-modification".to_string(), "Y".to_string());
+        if !config.options.contains_key("allow-remote-config-modification") {
+            config.options.insert("allow-remote-config-modification".to_string(), "Y".to_string());
             store = true;
         }
         if let Some(mut socks) = config.socks {
@@ -1731,31 +1731,31 @@ pub struct LocalConfig {
 impl LocalConfig {
     fn load() -> LocalConfig {
         let mut config = Config::load_::<LocalConfig>("_local");
-        let mut store = false;
+        let mut store = false;
         // 常规-启用 IPv6 P2P 连接：默认打勾
-		if !config.options.contains_key("enable-ipv6-punch") {
-			config.options.insert("enable-ipv6-punch".to_string(), "Y".to_string());
-			store = true;
+		if !config.options.contains_key("enable-ipv6-punch") {
+			config.options.insert("enable-ipv6-punch".to_string(), "Y".to_string());
+			store = true;
 		}
 		// 常规-启用 UDP 打洞：默认打勾
-        if !config.options.contains_key("enable-udp-punch") {
-            config.options.insert("enable-udp-punch".to_string(), "Y".to_string());
-            store = true;
+        if !config.options.contains_key("enable-udp-punch") {
+            config.options.insert("enable-udp-punch".to_string(), "Y".to_string());
+            store = true;
         }
         // 常规-启动时检查软件更新：默认去勾
-        if !config.options.contains_key("enable-check-update") {
-            config.options.insert("enable-check-update".to_string(), "N".to_string());
+        if !config.options.contains_key("enable-check-update") {
+            config.options.insert("enable-check-update".to_string(), "N".to_string());
             store = true;
         }
         // 常规-主题：默认主题改为暗黑
-        if !config.options.contains_key("theme") {
-            config.options.insert("theme".to_string(), "dark".to_string());
+        if !config.options.contains_key("theme") {
+            config.options.insert("theme".to_string(), "dark".to_string());
             store = true;
         }
 		
         // 常规-安全-允许远程修改配置
-        if !config.options.contains_key("allow-remote-config-modification") {
-            config.options.insert("allow-remote-config-modification".to_string(), "Y".to_string());
+        if !config.options.contains_key("allow-remote-config-modification") {
+            config.options.insert("allow-remote-config-modification".to_string(), "Y".to_string());
             store = true;
         }
         if store {
