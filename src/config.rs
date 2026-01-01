@@ -1727,31 +1727,35 @@ pub struct LocalConfig {
     ui_flutter: HashMap<String, String>,
 }
 
-use crate::config::keys; // 确保 keys 模块可见
 
 impl LocalConfig {
     fn load() -> LocalConfig {
         let mut config = Config::load_::<LocalConfig>("_local");
-        let mut store = false;
-        // 常规-启用 IPv6 P2P 连接：默认打勾 (Y) (keys::OPTION_ENABLE_IPV6_PUNCH)
-        if !config.options.contains_key(keys::OPTION_ENABLE_IPV6_PUNCH) {
-            config.options.insert(keys::OPTION_ENABLE_IPV6_PUNCH.to_string(), "Y".to_string());
+        let mut store = false;
+        // 常规-启用 IPv6 P2P 连接：默认打勾
+		if !config.options.contains_key("enable-ipv6-punch") {
+			config.options.insert("enable-ipv6-punch".to_string(), "Y".to_string());
+			store = true;
+		}
+		// 常规-启用 UDP 打洞：默认打勾
+        if !config.options.contains_key("enable-udp-punch") {
+            config.options.insert("enable-udp-punch".to_string(), "Y".to_string());
+            store = true;
+        }
+        // 常规-启动时检查软件更新：默认去勾
+        if !config.options.contains_key("enable-check-update") {
+            config.options.insert("enable-check-update".to_string(), "N".to_string());
             store = true;
         }
-        // 常规-启动时检查软件更新：默认去勾 (N) (keys::OPTION_ENABLE_CHECK_UPDATE)
-        if !config.options.contains_key(keys::OPTION_ENABLE_CHECK_UPDATE) {
-            config.options.insert(keys::OPTION_ENABLE_CHECK_UPDATE.to_string(), "N".to_string());
-            store = true;
-        }
-        // 常规-主题：默认主题改为暗黑 (keys::OPTION_THEME)
-        if !config.options.contains_key(keys::OPTION_THEME) {
-            config.options.insert(keys::OPTION_THEME.to_string(), "dark".to_string());
+        // 常规-主题：默认主题改为暗黑
+        if !config.options.contains_key("theme") {
+            config.options.insert("theme".to_string(), "dark".to_string());
             store = true;
         }
 		
-        // 常规-启用 UDP 打洞：默认打勾 (Y) (keys::OPTION_ENABLE_UDP_PUNCH)
-        if !config.options.contains_key(keys::OPTION_ENABLE_UDP_PUNCH) {
-            config.options.insert(keys::OPTION_ENABLE_UDP_PUNCH.to_string(), "Y".to_string());
+        // 常规-安全-允许远程修改配置
+        if !config.options.contains_key("allow-remote-config-modification") {
+            config.options.insert("allow-remote-config-modification".to_string(), "Y".to_string());
             store = true;
         }
         if store {
