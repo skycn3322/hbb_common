@@ -188,7 +188,7 @@ impl WebRTCStream {
             }
         }
 
-        // If there is no STUN (either TURN-only or empty config) â†’ prepend defaults
+        // If there is no STUN (either TURN-only or empty config) â†?prepend defaults
         if !has_stun {
             ice_servers.insert(
                 0,
