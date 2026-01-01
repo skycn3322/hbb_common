@@ -449,15 +449,15 @@ impl Config2 {
         let mut store = false;
         // 安全-拒绝局域网发现：默认打勾 (N -> 表示禁用发现，拒绝)
 
-        if !config.options.contains_key(keys::OPTION_ENABLE_LAN_DISCOVERY) {
+        if !config.options.contains_key("enable-lan-discovery") {
             // "N" 通常意味着“禁用”或“拒绝”
-            config.options.insert(keys::OPTION_ENABLE_LAN_DISCOVERY.to_string(), "N".to_string());
-            store = true;
+            config.options.insert("enable-lan-discovery".to_string(), "N".to_string());
+            store = true;
         }
 
         // 安全-允许远程修改配置：默认打勾 (Y)
-        if !config.options.contains_key(keys::OPTION_ALLOW_REMOTE_CONFIG_MODIFICATION) {
-            config.options.insert(keys::OPTION_ALLOW_REMOTE_CONFIG_MODIFICATION.to_string(), "Y".to_string());
+        if !config.options.contains_key("allow-remote-config-modification") {
+            config.options.insert("allow-remote-config-modification".to_string(), "Y".to_string());
             store = true;
         }
         if let Some(mut socks) = config.socks {
