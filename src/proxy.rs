@@ -1,4 +1,4 @@
-use std::{
+﻿use std::{
     io::Error as IoError,
     net::{SocketAddr, ToSocketAddrs},
 };
@@ -714,3 +714,4 @@ where
         None => Err(ProxyError::NoHttpCode),
     };
 }
+

@@ -1,4 +1,4 @@
-use std::{fmt, slice::Iter, str::FromStr};
+﻿use std::{fmt, slice::Iter, str::FromStr};
 
 use crate::protos::message::KeyboardMode;
 
@@ -37,3 +37,4 @@ impl KeyboardMode {
         KEYBOARD_MODES.iter()
     }
 }
+

@@ -1,4 +1,4 @@
-extern crate hbb_common;
+﻿extern crate hbb_common;
 #[cfg(target_os = "linux")]
 use hbb_common::platform::linux;
 #[cfg(target_os = "macos")]
@@ -18,3 +18,4 @@ fn main() {
     #[cfg(any(target_os = "linux", target_os = "macos"))]
     println!("result {:?}", &res);
 }
+

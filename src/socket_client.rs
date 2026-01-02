@@ -1,4 +1,4 @@
-#[cfg(feature = "webrtc")]
+﻿#[cfg(feature = "webrtc")]
 use crate::webrtc::{self, is_webrtc_endpoint};
 use crate::{
     config::{Config, NetworkType},
@@ -346,3 +346,4 @@ mod tests {
         assert_eq!(increase_port("z1:2", 1), "z1:3");
     }
 }
+

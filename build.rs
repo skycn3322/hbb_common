@@ -1,4 +1,4 @@
-fn main() {
+﻿fn main() {
     let out_dir = format!("{}/protos", std::env::var("OUT_DIR").unwrap());
 
     std::fs::create_dir_all(&out_dir).unwrap();
@@ -12,3 +12,4 @@ fn main() {
         .run()
         .expect("Codegen failed.");
 }
+

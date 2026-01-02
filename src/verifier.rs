@@ -1,4 +1,4 @@
-use crate::ResultType;
+﻿use crate::ResultType;
 use rustls_pki_types::{ServerName, UnixTime};
 use std::sync::Arc;
 use tokio_rustls::rustls::{self, client::WebPkiServerVerifier, ClientConfig};
@@ -255,3 +255,4 @@ pub fn client_config_danger() -> ResultType<ClientConfig> {
         .with_no_client_auth();
     Ok(config)
 }
+

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::RwLock};
+﻿use std::{collections::HashMap, sync::RwLock};
 
 use crate::config::allow_insecure_tls_fallback;
 
@@ -119,3 +119,4 @@ mod tests {
         }
     }
 }
+

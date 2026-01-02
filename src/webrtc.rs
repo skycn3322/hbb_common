@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+﻿use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
@@ -188,7 +188,7 @@ impl WebRTCStream {
             }
         }
 
-        // If there is no STUN (either TURN-only or empty config) �?prepend defaults
+        // If there is no STUN (either TURN-only or empty config) 鈫?prepend defaults
         if !has_stun {
             ice_servers.insert(
                 0,
@@ -768,3 +768,4 @@ IHR5cCBzcmZseCByYWRkciAwLjAuMC4wIHJwb3J0IDY0MDA4XHJcbmE9ZW5kLW9mLWNhbmRpZGF0ZXNc
         );
     }
 }
+

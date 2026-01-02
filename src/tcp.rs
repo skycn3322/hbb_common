@@ -1,4 +1,4 @@
-use crate::{bail, bytes_codec::BytesCodec, ResultType, config::Socks5Server, proxy::Proxy};
+﻿use crate::{bail, bytes_codec::BytesCodec, ResultType, config::Socks5Server, proxy::Proxy};
 use anyhow::Context as AnyhowCtx;
 use bytes::{BufMut, Bytes, BytesMut};
 use futures::{SinkExt, StreamExt};
@@ -342,3 +342,4 @@ impl Encrypt {
         Ok(Key(key))
     }
 }
+

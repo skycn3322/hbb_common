@@ -1,4 +1,4 @@
-use crate::ResultType;
+﻿use crate::ResultType;
 use std::{collections::HashMap, process::Command};
 
 use sctk::{
@@ -456,3 +456,4 @@ mod tests {
         );
     }
 }
+

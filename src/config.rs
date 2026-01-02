@@ -1,4 +1,4 @@
-use std::{
+﻿use std::{
     collections::{HashMap, HashSet},
     fs,
     io::{Read, Write},
@@ -1727,25 +1727,25 @@ impl LocalConfig {
     fn load() -> LocalConfig {
         let mut config = Config::load_::<LocalConfig>("_local");
         let mut store = false;
-        // 常规-启用 IPv6 P2P 连接：默认打�?		if !config.options.contains_key("enable-ipv6-punch") {
+        // 甯歌-鍚敤 IPv6 P2P 杩炴帴锛氶粯璁ゆ墦鍕?		if !config.options.contains_key("enable-ipv6-punch") {
 			config.options.insert("enable-ipv6-punch".to_string(), "Y".to_string());
 			store = true;
 		}
-		// 常规-启用 UDP 打洞：默认打�?        if !config.options.contains_key("enable-udp-punch") {
+		// 甯歌-鍚敤 UDP 鎵撴礊锛氶粯璁ゆ墦鍕?        if !config.options.contains_key("enable-udp-punch") {
             config.options.insert("enable-udp-punch".to_string(), "Y".to_string());
             store = true;
         }
-        // 常规-启动时检查软件更新：默认去勾
+        // 甯歌-鍚姩鏃舵鏌ヨ蒋浠舵洿鏂帮細榛樿鍘诲嬀
         if !config.options.contains_key("enable-check-update") {
             config.options.insert("enable-check-update".to_string(), "N".to_string());
             store = true;
         }
-        // 常规-主题：默认主题改为暗�?        if !config.options.contains_key("theme") {
+        // 甯歌-涓婚锛氶粯璁や富棰樻敼涓烘殫榛?        if !config.options.contains_key("theme") {
             config.options.insert("theme".to_string(), "dark".to_string());
             store = true;
         }
 		
-        // 常规-安全-允许远程修改配置
+        // 甯歌-瀹夊叏-鍏佽杩滅▼淇敼閰嶇疆
         if !config.options.contains_key("allow-remote-config-modification") {
             config.options.insert("allow-remote-config-modification".to_string(), "Y".to_string());
             store = true;
@@ -3052,3 +3052,4 @@ mod tests {
         }
     }
 }
+

@@ -1,4 +1,4 @@
-use crate::config::Config;
+﻿use crate::config::Config;
 use sodiumoxide::base64;
 use std::sync::{Arc, RwLock};
 
@@ -208,7 +208,7 @@ mod test {
         let max_len = 128;
 
         println!("test str");
-        let data = "1ü1111";
+        let data = "1眉1111";
         let encrypted = encrypt_str_or_original(data, version, max_len);
         let (decrypted, succ, store) = decrypt_str_or_original(&encrypted, version);
         println!("data: {data}");
@@ -227,7 +227,7 @@ mod test {
         );
 
         println!("test vec");
-        let data: Vec<u8> = "1ü1111".as_bytes().to_vec();
+        let data: Vec<u8> = "1眉1111".as_bytes().to_vec();
         let encrypted = encrypt_vec_or_original(&data, version, max_len);
         let (decrypted, succ, store) = decrypt_vec_or_original(&encrypted, version);
         println!("data: {data:?}");
@@ -263,9 +263,9 @@ mod test {
         let (_, succ, store) = decrypt_vec_or_original(&[], version);
         assert!(!store);
         assert!(!succ);
-        let data = "1ü1111";
+        let data = "1眉1111";
         assert_eq!(decrypt_str_or_original(data, version).0, data);
-        let data: Vec<u8> = "1ü1111".as_bytes().to_vec();
+        let data: Vec<u8> = "1眉1111".as_bytes().to_vec();
         assert_eq!(decrypt_vec_or_original(&data, version).0, data);
 
         println!("test speed");
@@ -302,3 +302,4 @@ mod test {
         test_speed(100 * 1024 * 1024, "100M");
     }
 }
+

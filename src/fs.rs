@@ -1,4 +1,4 @@
-#[cfg(windows)]
+﻿#[cfg(windows)]
 use std::os::windows::prelude::*;
 use std::{
     fmt::{Debug, Display},
@@ -1337,3 +1337,4 @@ pub fn serialize_transfer_job(job: &TransferJob, done: bool, cancel: bool, error
     value["error"] = json!(error);
     serde_json::to_string(&value).unwrap_or_default()
 }
+

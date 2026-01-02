@@ -1,4 +1,4 @@
-use crate::ResultType;
+﻿use crate::ResultType;
 use anyhow::{anyhow, Context};
 use bytes::{Bytes, BytesMut};
 use futures::{SinkExt, StreamExt};
@@ -169,3 +169,4 @@ impl FramedSocket {
         None
     }
 }
+

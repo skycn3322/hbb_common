@@ -1,4 +1,4 @@
-use std::{
+﻿use std::{
     collections::VecDeque,
     sync::{Arc, Mutex},
     time::Instant,
@@ -196,3 +196,4 @@ pub fn is_windows_version_or_greater(
 
     result == TRUE
 }
+

@@ -1,4 +1,4 @@
-#[cfg(target_os = "linux")]
+﻿#[cfg(target_os = "linux")]
 pub mod linux;
 
 #[cfg(target_os = "macos")]
@@ -80,3 +80,4 @@ where
         libc::signal(libc::SIGSEGV, breakdown_signal_handler as _);
     }
 }
+

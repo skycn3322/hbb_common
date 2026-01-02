@@ -1,4 +1,4 @@
-use std::{cell::RefCell, io};
+﻿use std::{cell::RefCell, io};
 use zstd::bulk::Compressor;
 
 // The library supports regular compression levels from 1 up to ZSTD_maxCLevel(),
@@ -32,3 +32,4 @@ pub fn compress(data: &[u8]) -> Vec<u8> {
 pub fn decompress(data: &[u8]) -> Vec<u8> {
     zstd::decode_all(data).unwrap_or_default()
 }
+

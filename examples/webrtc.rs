@@ -1,4 +1,4 @@
-extern crate hbb_common;
+﻿extern crate hbb_common;
 
 #[cfg(feature = "webrtc")]
 use hbb_common::webrtc::WebRTCStream;
@@ -152,3 +152,4 @@ async fn write_loop(mut stream: WebRTCStream) -> Result<()> {
 
     Ok(())
 }
+

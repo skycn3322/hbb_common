@@ -1,4 +1,4 @@
-use crate::ResultType;
+﻿use crate::ResultType;
 use osascript;
 use serde_derive::{Deserialize, Serialize};
 
@@ -53,3 +53,4 @@ pub fn alert(
     })?;
     Ok(result.button)
 }
+

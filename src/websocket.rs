@@ -1,4 +1,4 @@
-use crate::{
+﻿use crate::{
     config::{
         keys::OPTION_RELAY_SERVER, use_ws, Config, Socks5Server, RELAY_PORT, RENDEZVOUS_PORT,
     },
@@ -529,3 +529,4 @@ mod tests {
         assert_eq!(check_ws("127.0.0.1:34567"), "ws://127.0.0.1:34569");
     }
 }
+

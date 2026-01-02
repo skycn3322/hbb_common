@@ -1,4 +1,4 @@
-use serde_derive::{Deserialize, Serialize};
+﻿use serde_derive::{Deserialize, Serialize};
 use sha2::digest::Update;
 use sha2::{Digest, Sha512};
 use std::collections::HashMap;
@@ -379,3 +379,4 @@ fn calculate_fingerprint(parameters: &[String]) -> Vec<u8> {
     hasher.update(fingerprint_string.as_bytes());
     hasher.finalize()
 }
+
